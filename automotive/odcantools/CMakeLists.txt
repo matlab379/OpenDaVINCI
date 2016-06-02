@@ -53,6 +53,7 @@ IF(    (UNIX)
         ###########################################################################
         # Add subdirectories.
         ADD_SUBDIRECTORY (libodcantools)
+        ADD_SUBDIRECTORY (odcanrec2csv)
         ADD_SUBDIRECTORY (odcanascreplay)
         ADD_SUBDIRECTORY (odcanproxy)
         ADD_SUBDIRECTORY (odcanmapper)
