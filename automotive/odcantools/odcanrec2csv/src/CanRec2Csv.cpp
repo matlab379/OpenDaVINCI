@@ -39,7 +39,7 @@ namespace odrec2csv {
     using namespace odcore::base;
     using namespace odcore::data;
 
-    Rec2csv::Rec2csv(const int32_t &argc, char **argv) :
+    Rec2Csv::Rec2Csv(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "odcanrec2csv"),
         m_fifo() {
         
@@ -47,11 +47,12 @@ namespace odrec2csv {
         for(int i=0;i<MAX_CSVs;++i) m_csv_files[i]=NULL;
     }
 
-    Rec2csv::~Rec2csv() {}
+    Rec2Csv::~Rec2Csv() {}
 
-    void Rec2csv::setUp() {}
+    void Rec2Csv::setUp() {}
 
-    void Rec2csv::tearDown() {
+    void Rec2Csv::tearDown() {
+        // free memory
         for(int i=0;i<MAX_CSVs;++i)
             if(m_csvs[i]!=NULL)
                 delete m_csvs[i];
@@ -61,9 +62,10 @@ namespace odrec2csv {
                     m_csv_files[i]->close();
     }
 
-    odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Rec2csv::body() {
+    odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Rec2Csv::body() {
         addDataStoreFor(m_fifo);
         
+        // init
         stringstream outputs[MAX_CSVs];
         for(int i=0;i<MAX_CSVs;++i)
             m_csvs[i]=new CSVFromVisitableVisitor(outputs[i],true,',');
@@ -76,18 +78,19 @@ namespace odrec2csv {
             while (!m_fifo.isEmpty()) {
                 Container c = m_fifo.leave();
                 
-                CLOG2 << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() << "-->" << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << " dt = " << (c.getReceivedTimeStamp() - c.getSentTimeStamp()).toString() << " ID = " << c.getDataType() << endl; 
+                // for debugging purposes
+                CLOG2 << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() << "-->" << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << 
+                        " dt = " << (c.getReceivedTimeStamp() - c.getSentTimeStamp()).toString() << " ID = " << c.getDataType() << endl; 
                 
-                
-//message from.opendlv.proxy.reverefh16.ManualControl [id = 191]
-//message from.opendlv.proxy.reverefh16.AccelerationRequest [id = 192]
-//message from.opendlv.proxy.reverefh16.BrakeRequest [id = 193]
-//message from.opendlv.proxy.reverefh16.SteeringRequest [id = 194]
-//message from.opendlv.proxy.reverefh16.Axles [id = 195]
-//message from.opendlv.proxy.reverefh16.Propulsion [id = 196]
-//message from.opendlv.proxy.reverefh16.VehicleState [id = 197]
-//message from.opendlv.proxy.reverefh16.Wheels [id = 198]
-//message from.opendlv.proxy.reverefh16.Steering [id = 199]
+                //message from.opendlv.proxy.reverefh16.ManualControl [id = 191]
+                //message from.opendlv.proxy.reverefh16.AccelerationRequest [id = 192]
+                //message from.opendlv.proxy.reverefh16.BrakeRequest [id = 193]
+                //message from.opendlv.proxy.reverefh16.SteeringRequest [id = 194]
+                //message from.opendlv.proxy.reverefh16.Axles [id = 195]
+                //message from.opendlv.proxy.reverefh16.Propulsion [id = 196]
+                //message from.opendlv.proxy.reverefh16.VehicleState [id = 197]
+                //message from.opendlv.proxy.reverefh16.Wheels [id = 198]
+                //message from.opendlv.proxy.reverefh16.Steering [id = 199]
                 
                 switch(c.getDataType())
                 {
@@ -186,6 +189,7 @@ namespace odrec2csv {
             }
         }
         
+        // diagnostic prints
         CLOG2 <<endl<< " CSV_Pedals:\n" << outputs[0].str()<<endl;
         CLOG2 << " CSV_AccelerationRequest:\n" << outputs[1].str()<<endl;
         CLOG2 << " CSV_BrakeRequest:\n" << outputs[2].str()<<endl;
@@ -198,14 +202,15 @@ namespace odrec2csv {
         
         string filename="", header="CSV_", trailer=".csv";
         
-        // print all type identifiers that were identified
+        // print all type identifiers that were identified and dump the data in csv files
         cout << endl << "Identified data types:";
         for(int i=0;i<MAX_CSVs;++i)
             if(ids[i]!=-1)
             {
+                // print IDs
                 cout << " " << ids[i];
                 
-                // dump result in a csv file
+                // dump results in files
                 filename=header+std::to_string(ids[i])+trailer; // C++11
                 m_csv_files[i]=new ofstream (filename);
                 if(m_csv_files[i]->is_open())

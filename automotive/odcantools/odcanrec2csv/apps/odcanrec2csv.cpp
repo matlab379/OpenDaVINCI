@@ -19,6 +19,6 @@
 #include "CanRec2Csv.h"
 
 int32_t main(int32_t argc, char **argv) {
-    odrec2csv::Rec2csv rc(argc, argv);
+    odrec2csv::Rec2Csv rc(argc, argv);
     return rc.runModule();
 }

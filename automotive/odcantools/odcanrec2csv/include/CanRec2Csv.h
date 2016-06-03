@@ -36,7 +36,7 @@ namespace odrec2csv {
      * This class can be used to simply display data distributed
      * using a conference.
      */
-    class Rec2csv : public odcore::base::module::TimeTriggeredConferenceClientModule {
+    class Rec2Csv : public odcore::base::module::TimeTriggeredConferenceClientModule {
         private:
             /**
              * "Forbidden" copy constructor. Goal: The compiler should warn
@@ -45,7 +45,7 @@ namespace odrec2csv {
              *
              * @param obj Reference to an object of this class.
              */
-            Rec2csv(const Rec2csv &/*obj*/);
+            Rec2Csv(const Rec2Csv &/*obj*/);
 
             /**
              * "Forbidden" assignment operator. Goal: The compiler should warn
@@ -55,7 +55,7 @@ namespace odrec2csv {
              * @param obj Reference to an object of this class.
              * @return Reference to this instance.
              */
-            Rec2csv& operator=(const Rec2csv &/*obj*/);
+            Rec2Csv& operator=(const Rec2Csv &/*obj*/);
 
         public:
             /**
@@ -64,9 +64,9 @@ namespace odrec2csv {
              * @param argc Number of command line arguments.
              * @param argv Command line arguments.
              */
-            Rec2csv(const int32_t &argc, char **argv);
+            Rec2Csv(const int32_t &argc, char **argv);
 
-            virtual ~Rec2csv();
+            virtual ~Rec2Csv();
 
             odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
