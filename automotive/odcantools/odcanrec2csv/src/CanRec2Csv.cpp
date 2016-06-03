@@ -199,7 +199,7 @@ namespace odrec2csv {
         string filename="", header="CSV_", trailer=".csv";
         
         // print all type identifiers that were identified
-        cout << "Identified data types:";
+        cout << endl << "Identified data types:";
         for(int i=0;i<MAX_CSVs;++i)
             if(ids[i]!=-1)
             {
