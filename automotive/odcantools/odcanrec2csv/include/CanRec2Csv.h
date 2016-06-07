@@ -25,13 +25,17 @@
 #include "opendavinci/generated/odcore/data/dmcp/ModuleExitCodeMessage.h"
 
 #include "opendavinci/odcore/reflection/CSVFromVisitableVisitor.h"
+#include "opendavinci/odcore/reflection/Field.h"
 
 #define MAX_CSVs 9
 
 namespace odrec2csv {
 
     using namespace std;
+    using namespace odcore::base;
+    using namespace odcore::data;
     using namespace odcore::reflection;
+    
     /**
      * This class can be used to simply display data distributed
      * using a conference.
@@ -77,8 +81,10 @@ namespace odrec2csv {
 
             virtual void tearDown();
             
-            CSVFromVisitableVisitor* m_csvs[MAX_CSVs];
-            ofstream* m_csv_files[MAX_CSVs];
+            shared_ptr<CSVFromVisitableVisitor> m_csvs[MAX_CSVs];
+            shared_ptr<ofstream> m_csv_files[MAX_CSVs];
+            
+            shared_ptr<Field<uint64_t>> m_sentTS_ptr, m_receivedTS_ptr;
     };
 
 } // odrec2csv

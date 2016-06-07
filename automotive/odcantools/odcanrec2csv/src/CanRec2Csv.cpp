@@ -34,14 +34,11 @@
 #include "automotivedata/generated/from/opendlv/proxy/reverefh16/Steering.h"
 
 namespace odrec2csv {
-
-    using namespace std;
-    using namespace odcore::base;
-    using namespace odcore::data;
-
     Rec2Csv::Rec2Csv(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "odcanrec2csv"),
-        m_fifo() {
+        m_fifo(),
+        m_sentTS_ptr(NULL),
+        m_receivedTS_ptr(NULL) {
         
         for(int i=0;i<MAX_CSVs;++i) m_csvs[i]=NULL;
         for(int i=0;i<MAX_CSVs;++i) m_csv_files[i]=NULL;
@@ -52,14 +49,20 @@ namespace odrec2csv {
     void Rec2Csv::setUp() {}
 
     void Rec2Csv::tearDown() {
-        // free memory
-        for(int i=0;i<MAX_CSVs;++i)
-            if(m_csvs[i]!=NULL)
-                delete m_csvs[i];
-                
         for(int i=0;i<MAX_CSVs;++i)
             if(m_csv_files[i]!=NULL && m_csv_files[i]->is_open())
                     m_csv_files[i]->close();
+        
+        for(int i=0;i<MAX_CSVs;++i)
+            if(m_csv_files[i]!=NULL)
+                    m_csv_files[i].reset();
+        
+        for(int i=0;i<MAX_CSVs;++i)
+            if(m_csvs[i]!=NULL)
+                m_csvs[i].reset();
+        
+        m_sentTS_ptr.reset();
+        m_receivedTS_ptr.reset();
     }
 
     odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Rec2Csv::body() {
@@ -68,11 +71,12 @@ namespace odrec2csv {
         // init
         stringstream outputs[MAX_CSVs];
         for(int i=0;i<MAX_CSVs;++i)
-            m_csvs[i]=new CSVFromVisitableVisitor(outputs[i],true,',');
+            m_csvs[i]=shared_ptr<CSVFromVisitableVisitor>(new CSVFromVisitableVisitor(outputs[i],true,','));
         Message message[MAX_CSVs];
         int ids[MAX_CSVs];
         for(int i=0;i<MAX_CSVs;++i)
             ids[i]=-1;
+        uint64_t sentTS=0,receivedTS=0;
         
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
             while (!m_fifo.isEmpty()) {
@@ -80,7 +84,27 @@ namespace odrec2csv {
                 
                 // for debugging purposes
                 CLOG2 << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() << "-->" << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << 
-                        " dt = " << (c.getReceivedTimeStamp() - c.getSentTimeStamp()).toString() << " ID = " << c.getDataType() << endl; 
+                        " dt = " << (c.getReceivedTimeStamp() - c.getSentTimeStamp()).toString() << " ID = " << c.getDataType() << endl;
+                
+                // get TimeStamps
+                sentTS=c.getSentTimeStamp().toMicroseconds();
+                receivedTS=c.getReceivedTimeStamp().toMicroseconds();
+                
+                m_sentTS_ptr = shared_ptr<Field<uint64_t>>(new Field<uint64_t>(sentTS));
+                m_sentTS_ptr->setLongFieldIdentifier(0);
+                m_sentTS_ptr->setShortFieldIdentifier(0);
+                m_sentTS_ptr->setLongFieldName("Sent_TimeStamp");
+                m_sentTS_ptr->setShortFieldName("Sent_TimeStamp");
+                m_sentTS_ptr->setFieldDataType(odcore::data::reflection::AbstractField::UINT64_T);
+                m_sentTS_ptr->setSize(sizeof(uint64_t));
+                
+                m_receivedTS_ptr = shared_ptr<Field<uint64_t>>(new Field<uint64_t>(receivedTS));
+                m_receivedTS_ptr->setLongFieldIdentifier(0);
+                m_receivedTS_ptr->setShortFieldIdentifier(0);
+                m_receivedTS_ptr->setLongFieldName("Received_TimeStamp");
+                m_receivedTS_ptr->setShortFieldName("Received_TimeStamp");
+                m_receivedTS_ptr->setFieldDataType(odcore::data::reflection::AbstractField::UINT64_T);
+                m_receivedTS_ptr->setSize(sizeof(uint64_t));
                 
                 //message from.opendlv.proxy.reverefh16.ManualControl [id = 191]
                 //message from.opendlv.proxy.reverefh16.AccelerationRequest [id = 192]
@@ -100,6 +124,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[0]=mfvv.getMessage();
+                        message[0].addField(m_sentTS_ptr);
+                        message[0].addField(m_receivedTS_ptr);
                         message[0].accept(*m_csvs[0]);
                         ids[0]=191;
                     }
@@ -110,6 +136,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[1]=mfvv.getMessage();
+                        message[1].addField(m_sentTS_ptr);
+                        message[1].addField(m_receivedTS_ptr);
                         message[1].accept(*m_csvs[1]);
                         ids[1]=192;
                     }
@@ -120,6 +148,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[2]=mfvv.getMessage();
+                        message[2].addField(m_sentTS_ptr);
+                        message[2].addField(m_receivedTS_ptr);
                         message[2].accept(*m_csvs[2]);
                         ids[2]=193;
                     }
@@ -130,6 +160,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[3]=mfvv.getMessage();
+                        message[3].addField(m_sentTS_ptr);
+                        message[3].addField(m_receivedTS_ptr);
                         message[3].accept(*m_csvs[3]);
                         ids[3]=194;
                     }
@@ -140,6 +172,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[4]=mfvv.getMessage();
+                        message[4].addField(m_sentTS_ptr);
+                        message[4].addField(m_receivedTS_ptr);
                         message[4].accept(*m_csvs[4]);
                         ids[4]=195;
                     }
@@ -150,6 +184,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[5]=mfvv.getMessage();
+                        message[5].addField(m_sentTS_ptr);
+                        message[5].addField(m_receivedTS_ptr);
                         message[5].accept(*m_csvs[5]);
                         ids[5]=196;
                     }
@@ -160,6 +196,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         temp.accept(mfvv);
                         message[6]=mfvv.getMessage();
+                        message[6].addField(m_sentTS_ptr);
+                        message[6].addField(m_receivedTS_ptr);
                         message[6].accept(*m_csvs[6]);
                         ids[6]=197;
                     }
@@ -170,6 +208,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         w.accept(mfvv);
                         message[7]=mfvv.getMessage();
+                        message[7].addField(m_sentTS_ptr);
+                        message[7].addField(m_receivedTS_ptr);
                         message[7].accept(*m_csvs[7]);
                         ids[7]=198;
                     }
@@ -180,6 +220,8 @@ namespace odrec2csv {
                         MessageFromVisitableVisitor mfvv;
                         w.accept(mfvv);
                         message[8]=mfvv.getMessage();
+                        message[8].addField(m_sentTS_ptr);
+                        message[8].addField(m_receivedTS_ptr);
                         message[8].accept(*m_csvs[8]);
                         ids[8]=199;
                     }
@@ -212,7 +254,7 @@ namespace odrec2csv {
                 
                 // dump results in files
                 filename=header+std::to_string(ids[i])+trailer; // C++11
-                m_csv_files[i]=new ofstream (filename);
+                m_csv_files[i]=shared_ptr<ofstream>(new ofstream (filename));
                 if(m_csv_files[i]->is_open())
                 {
                     *m_csv_files[i] << outputs[i].str();
