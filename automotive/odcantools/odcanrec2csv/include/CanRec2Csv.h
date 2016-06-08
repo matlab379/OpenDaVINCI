@@ -81,9 +81,14 @@ namespace odrec2csv {
 
             virtual void tearDown();
             
+        protected:
+        
+            void processContainer(Container c);
+            
+            stringstream m_outputs[MAX_CSVs];
+            int m_ids[MAX_CSVs];
             shared_ptr<CSVFromVisitableVisitor> m_csvs[MAX_CSVs];
             shared_ptr<ofstream> m_csv_files[MAX_CSVs];
-            
             shared_ptr<Field<uint64_t>> m_sentTS_ptr, m_receivedTS_ptr;
     };
 
