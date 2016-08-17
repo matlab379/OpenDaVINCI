@@ -55,7 +55,8 @@ namespace odplayerh264 {
         m_parser(NULL),
         m_picture(NULL),
         m_pixelTransformationContext(NULL),
-        m_frameBGR(NULL) {
+        m_frameBGR(NULL),
+        m_pFile(NULL) {
         // Try to connect to odrecorderh264 process to exchange Containers to encode.
         try {
             m_connection = shared_ptr<TCPConnection>(TCPFactory::createTCPConnectionTo("127.0.0.1", port));
@@ -73,10 +74,13 @@ namespace odplayerh264 {
 
         // Create a buffer to read from file.
         m_readFromFileBuffer = new uint8_t[BUFFER_SIZE + FF_INPUT_BUFFER_PADDING_SIZE];
+        
+        m_pFile=fopen("yin.bin","wb");
     }
 
     PlayerH264Decoder::~PlayerH264Decoder() {
         stopAndCleanUpDecoding();
+        fclose(m_pFile);
     }
 
     bool PlayerH264Decoder::hasConnection() {
@@ -315,6 +319,11 @@ namespace odplayerh264 {
         }
         else {
             if (gotPicture) {
+                if(m_frameCounter<20){
+                    fwrite(m_picture->data[0],(m_picture->width)*(m_picture->height),1,m_pFile);
+                    fwrite(m_picture->data[1],(m_picture->width)*(m_picture->height)/4,1,m_pFile);
+                    fwrite(m_picture->data[2],(m_picture->width)*(m_picture->height)/4,1,m_pFile);
+                }
                 m_frameCounter++;
 
                 // cout << "[odplayerh264] Read frame " << m_picture->pts << endl;

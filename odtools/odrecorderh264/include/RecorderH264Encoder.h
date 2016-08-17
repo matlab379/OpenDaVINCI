@@ -29,6 +29,7 @@ extern "C" {
 
 #include <memory>
 #include <string>
+#include <stdio.h>
 
 #include <opendavinci/odcore/base/Mutex.h>
 #include <opendavinci/odcore/io/ConnectionListener.h>
@@ -130,6 +131,7 @@ namespace odrecorderh264 {
             SwsContext *m_pixelTransformationContext;
             FILE *m_outputFile;
             AVFrame *m_frame;
+            FILE *m_pFile;
     };
 
 } // odrecorderh264

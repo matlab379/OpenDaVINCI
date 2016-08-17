@@ -31,6 +31,7 @@ extern "C" {
 
 #include <memory>
 #include <vector>
+#include <stdio.h>
 
 #include <opendavinci/odcore/base/Mutex.h>
 #include <opendavinci/odcore/io/ConnectionListener.h>
@@ -183,6 +184,7 @@ namespace odplayerh264 {
 
             // We return the image in BGR pixel format; thus, we need to transform the data from the decoder.
             AVFrame *m_frameBGR;
+            FILE *m_pFile;
     };
 
 } // odplayerh264

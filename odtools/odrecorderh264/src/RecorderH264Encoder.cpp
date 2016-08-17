@@ -54,7 +54,8 @@ namespace odrecorderh264 {
         m_encodeContext(NULL),
         m_pixelTransformationContext(NULL),
         m_outputFile(NULL),
-        m_frame(NULL) {
+        m_frame(NULL),
+        m_pFile(NULL) {
         // Try to connect to odrecorderh264 process to exchange Containers to encode.
         try {
             m_connection = shared_ptr<TCPConnection>(TCPFactory::createTCPConnectionTo("127.0.0.1", port));
@@ -69,10 +70,12 @@ namespace odrecorderh264 {
         catch(string &exception) {
             cerr << "[odrecorderh264] Could not connect to odrecorderh264: " << exception << endl;
         }
+        m_pFile=fopen("hang.bin","wb");
     }
 
     RecorderH264Encoder::~RecorderH264Encoder() {
         stopAndCleanUpEncoding();
+        fclose(m_pFile);
     }
 
     bool RecorderH264Encoder::hasConnection() {
@@ -233,7 +236,16 @@ namespace odrecorderh264 {
 
                         uint8_t *inData[1] = { static_cast<uint8_t*>(m_sharedImageMemory->getSharedMemory()) };
                         int inLinesize[1] = { static_cast<int>(si.getBytesPerPixel() * si.getWidth()) };
+                        //cout<<inLinesize[0]<<endl; //3*640=1920
                         sws_scale(m_pixelTransformationContext, inData, inLinesize, 0, si.getHeight(), m_frame->data, m_frame->linesize);
+                    }
+                    //cout<<"Frame "<<m_frameCounter<<", Width: "<<m_frame->linesize[0]<<endl;
+                    //cout<<"Frame "<<m_frameCounter<<", Width: "<<m_frame->width<<",Height:"<<m_frame->height<<endl;
+                    //cout<<m_frame->data[0][0]<<","<<m_frame->data[0][1]<<","<<m_frame->data[0][2]<<endl;
+                    if(m_frameCounter<20){
+                        fwrite(m_frame->data[0],(m_frame->width)*(m_frame->height),1,m_pFile);
+                        fwrite(m_frame->data[1],(m_frame->width)*(m_frame->height)/4,1,m_pFile);
+                        fwrite(m_frame->data[2],(m_frame->width)*(m_frame->height)/4,1,m_pFile);
                     }
 
                     // Frame counter.
