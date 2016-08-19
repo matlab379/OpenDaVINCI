@@ -30,6 +30,8 @@ INCLUDE (CheckCxxTestEnvironment)
 
 ###########################################################################
 # Find FFMEG to enable recording and playback of h264 encoded video streams.
+SET(INCAVCODECDIR /usr/include/ffmpeg2.8)
+SET(LIBAVCODECDIR /usr/lib/ffmpeg2.8)
 FIND_PACKAGE (FFMPEGMODULES)
 IF (FFMPEGMODULES_FOUND)
     ADD_SUBDIRECTORY (odrecorderh264)
