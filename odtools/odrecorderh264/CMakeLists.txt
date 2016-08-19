@@ -43,6 +43,8 @@ INCLUDE (CheckCxxTestEnvironment)
 
 ###########################################################################
 # Find FFMPEG modules.
+SET(INCAVCODECDIR /usr/include/ffmpeg2.8)
+SET(LIBAVCODECDIR /usr/lib/ffmpeg2.8)
 FIND_PACKAGE (FFMPEGMODULES 2.8 REQUIRED)
 SET(LIBRARIES ${LIBRARIES} ${FFMPEGMODULES_LIBRARIES})
 INCLUDE_DIRECTORIES (${FFMPEGMODULES_INCLUDE_DIRS})

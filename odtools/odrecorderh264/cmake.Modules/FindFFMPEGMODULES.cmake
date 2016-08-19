@@ -17,50 +17,43 @@
 
 ###########################################################################
 # Find libavcodec.
+MESSAGE(${INCAVCODECDIR})
+MESSAGE(${LIBAVCODECDIR})
 FIND_PATH(FFMPEG_AVCODEC_INCLUDE_DIR
           NAMES libavcodec/avcodec.h
-          PATHS /usr/local/include
-                /usr/include)
+          PATHS ${INCAVCODECDIR}
+                NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_AVCODEC_INCLUDE_DIR)
 FIND_LIBRARY(FFMPEG_AVCODEC_LIBRARY
              NAMES avcodec
-             PATHS ${LIBAVCODECDIR}/lib/
-                    /usr/lib/x86_64-linux-gnu/
-                    /usr/local/lib64/
-                    /usr/lib64/
-                    /usr/lib/)
+             PATHS ${LIBAVCODECDIR}
+                   NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_AVCODEC_LIBRARY)
 
 ###########################################################################
 # Find libavutil.
 FIND_PATH(FFMPEG_AVUTIL_INCLUDE_DIR
           NAMES libavutil/avutil.h
-          PATHS /usr/local/include
-                /usr/include)
+          PATHS ${INCAVCODECDIR}
+                NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_AVUTIL_INCLUDE_DIR)
 FIND_LIBRARY(FFMPEG_AVUTIL_LIBRARY
              NAMES avutil
-             PATHS ${LIBAVUTILDIR}/lib/
-                    /usr/lib/x86_64-linux-gnu/
-                    /usr/local/lib64/
-                    /usr/lib64/
-                    /usr/lib/)
+             PATHS ${LIBAVCODECDIR}
+                   NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_AVUTIL_LIBRARY)
 
 ###########################################################################
 # Find libswscale.
 FIND_PATH(FFMPEG_SWSCALE_INCLUDE_DIR
           NAMES libswscale/swscale.h
-          PATHS /usr/local/include
-                /usr/include)
+          PATHS ${INCAVCODECDIR}
+                NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_SWSCALE_INCLUDE_DIR)
 FIND_LIBRARY(FFMPEG_SWSCALE_LIBRARY
              NAMES swscale
-             PATHS ${LIBSWSCALEDIR}/lib/
-                    /usr/lib/x86_64-linux-gnu/
-                    /usr/local/lib64/
-                    /usr/lib64/
-                    /usr/lib/)
+             PATHS ${LIBAVCODECDIR}
+                   NO_DEFAULT_PATH)
 MARK_AS_ADVANCED(FFMPEG_SWSCALE_LIBRARY)
 
 ###########################################################################
